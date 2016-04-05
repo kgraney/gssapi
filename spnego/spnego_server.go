@@ -57,13 +57,13 @@ func (k KerberizedServer) AcquireCred(serviceName string) (*gssapi.CredId, error
 	return cred, nil
 }
 
-type ChallengeType struct {
+type challengeType struct {
 	ChallengeHeader string
 	ChallengeStatus int
 	AuthHeader      string
 }
 
-func (k KerberizedServer) DoNegotiation(t ChallengeType, cred *gssapi.CredId, inHeader,
+func (k KerberizedServer) doNegotiation(t challengeType, cred *gssapi.CredId, inHeader,
 	outHeader http.Header) (string, int, error) {
 	negotiate, inputToken := CheckSPNEGONegotiate(k.Lib, inHeader, t.AuthHeader)
 	defer inputToken.Release()
@@ -96,12 +96,12 @@ func (k KerberizedServer) DoNegotiation(t ChallengeType, cred *gssapi.CredId, in
 // conditions, whereas a 401 means that the client should respond to the
 // challenge that we send.
 func (k KerberizedServer) Negotiate(cred *gssapi.CredId, inHeader, outHeader http.Header) (string, int, error) {
-	challenge := ChallengeType{
+	challenge := challengeType{
 		ChallengeHeader: "WWW-Authenticate",
 		ChallengeStatus: http.StatusUnauthorized,
 		AuthHeader:      "Authorization",
 	}
-	return k.DoNegotiation(challenge, cred, inHeader, outHeader)
+	return k.doNegotiation(challenge, cred, inHeader, outHeader)
 }
 
 // ProxyNegotiate handles the SPNEGO client-server negotiation. ProxyNegotiate will likely
@@ -109,10 +109,10 @@ func (k KerberizedServer) Negotiate(cred *gssapi.CredId, inHeader, outHeader htt
 // conditions, whereas a 407 means that the client should respond to the
 // challenge that we send.
 func (k KerberizedServer) ProxyNegotiate(cred *gssapi.CredId, inHeader, outHeader http.Header) (string, int, error) {
-	challenge := ChallengeType{
+	challenge := challengeType{
 		ChallengeHeader: "Proxy-Authenticate",
 		ChallengeStatus: http.StatusProxyAuthRequired,
 		AuthHeader:      "Proxy-Authorization",
 	}
-	return k.DoNegotiation(challenge, cred, inHeader, outHeader)
+	return k.doNegotiation(challenge, cred, inHeader, outHeader)
 }
