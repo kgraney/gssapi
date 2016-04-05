@@ -20,7 +20,7 @@ type ServerNegotiator interface {
 	// Negotiate handles the negotiation with the client.
 	Negotiate(*gssapi.CredId, http.Header, http.Header) (string, int, error)
 
-	// Negotiate handles the negotiation with the proxy client.
+	// ProxyNegotiate handles the negotiation with the proxy client.
 	ProxyNegotiate(*gssapi.CredId, http.Header, http.Header) (string, int, error)
 }
 
