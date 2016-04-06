@@ -19,9 +19,6 @@ type ServerNegotiator interface {
 
 	// Negotiate handles the negotiation with the client.
 	Negotiate(*gssapi.CredId, http.Header, http.Header) (string, int, error)
-
-	// ProxyNegotiate handles the negotiation with the proxy client.
-	ProxyNegotiate(*gssapi.CredId, http.Header, http.Header) (string, int, error)
 }
 
 // A KerberizedServer allows a server to negotiate authentication over SPNEGO
@@ -30,7 +27,12 @@ type KerberizedServer struct {
 	*gssapi.Lib
 }
 
+type KerberizedProxyServer struct {
+	KerberizedServer
+}
+
 var _ ServerNegotiator = KerberizedServer{}
+var _ ServerNegotiator = KerberizedProxyServer{}
 
 // AcquireCred acquires a Kerberos credential (keytab) from environment. The
 // CredId MUST be released by the caller.
@@ -93,7 +95,7 @@ func (k KerberizedServer) doNegotiation(t challengeType, cred *gssapi.CredId, in
 
 // Negotiate handles the SPNEGO client-server negotiation. Negotiate will likely
 // be invoked multiple times; a 200 or 400 response code are terminating
-// conditions, whereas a 401 means that the client should respond to the
+// conditions, whereas a 401 or 407 means that the client should respond to the
 // challenge that we send.
 func (k KerberizedServer) Negotiate(cred *gssapi.CredId, inHeader, outHeader http.Header) (string, int, error) {
 	challenge := challengeType{
@@ -104,11 +106,7 @@ func (k KerberizedServer) Negotiate(cred *gssapi.CredId, inHeader, outHeader htt
 	return k.doNegotiation(challenge, cred, inHeader, outHeader)
 }
 
-// ProxyNegotiate handles the SPNEGO client-server negotiation. ProxyNegotiate will likely
-// be invoked multiple times; a 200 or 400 response code are terminating
-// conditions, whereas a 407 means that the client should respond to the
-// challenge that we send.
-func (k KerberizedServer) ProxyNegotiate(cred *gssapi.CredId, inHeader, outHeader http.Header) (string, int, error) {
+func (k KerberizedProxyServer) Negotiate(cred *gssapi.CredId, inHeader, outHeader http.Header) (string, int, error) {
 	challenge := challengeType{
 		ChallengeHeader: "Proxy-Authenticate",
 		ChallengeStatus: http.StatusProxyAuthRequired,
