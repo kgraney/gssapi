@@ -25,7 +25,7 @@ type ServerNegotiator interface {
 // with a client.
 type KerberizedServer struct {
 	*gssapi.Lib
-	useProxyAuthentication bool
+	UseProxyAuthentication bool
 }
 
 var _ ServerNegotiator = KerberizedServer{}
@@ -67,7 +67,7 @@ type challengeType struct {
 // challenge that we send.
 func (k KerberizedServer) Negotiate(cred *gssapi.CredId, inHeader, outHeader http.Header) (string, int, error) {
 	var challenge challengeType
-	if k.useProxyAuthentication {
+	if k.UseProxyAuthentication {
 		challenge = challengeType{
 			ChallengeHeader: "Proxy-Authenticate",
 			ChallengeStatus: http.StatusProxyAuthRequired,
