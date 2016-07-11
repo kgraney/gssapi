@@ -19,6 +19,7 @@ package gssapi
 
 /*
 #cgo darwin CFLAGS: -I/opt/local/include -I/usr/local/opt/heimdal/include
+#cgo CFLAGS: -I/usr/include -I/opt/heimdal/include
 #include <stdio.h>
 
 #include <gssapi/gssapi.h>
